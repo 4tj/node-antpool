@@ -13,11 +13,7 @@ const createSignature = (input, secret) => {
   return createHmac('sha256', secret).update(msg).digest('hex').toUpperCase()
 }
 
-const createApiCall = ({ key, secret, userId, coin, endpoint, timeout }) => async (
-  method,
-  path,
-  query
-) => {
+const createApiCall = ({ key, secret, userId, coin, endpoint, timeout }) => {
   const nonce = createNonce()
   const input = [
     userId,
@@ -25,39 +21,44 @@ const createApiCall = ({ key, secret, userId, coin, endpoint, timeout }) => asyn
     nonce
   ]
 
-  const params = {
-    key,
-    nonce,
-    signature: createSignature(input, secret),
-    coin,
-    ...query
-  }
-
-  const response = await axios.request({
-    url: `${endpoint}${path}`,
-    method,
-    params,
-    timeout
+  const instance = axios.create({
+    baseURL: endpoint,
+    timeout,
+    params: {
+      key,
+      nonce,
+      signature: createSignature(input, secret),
+      coin
+    }
   })
 
-  return response.data
+  instance.interceptors.response.use((response) => {
+    if (response.data?.code !== 0) {
+      throw Error(response.data.message)
+    }
+    return response.data.data
+  }, (error) => {
+    return Promise.reject(error)
+  })
+
+  return instance
 }
 
 export default options => {
   const endpoint = (options && options.endpoint) || ENDPOINT
   const timeout = (options && options.timeout) || TIMEOUT
-
   const apiRequest = createApiCall({ ...options, endpoint, timeout })
+
   return {
-    poolStats: () => apiRequest('POST', '/api/poolStats.htm'),
-    account: (query) => apiRequest('POST', '/api/account.htm', query),
-    hashrate: (query) => apiRequest('POST', '/api/hashrate.htm', query),
-    workers: (query) => apiRequest('POST', '/api/workers.htm', query),
-    paymentHistoryV2: (query) => apiRequest('POST', '/api/paymentHistoryV2.htm', query),
-    changeMiningCoin: () => apiRequest('POST', '/api/changeMiningCoin.htm'),
-    accountOverview: (query) => apiRequest('POST', '/api/accountOverview.htm', query),
-    userWorkerList: (query) => apiRequest('POST', '/api/userWorkerList.htm', query),
-    coinCalculator: (query) => apiRequest('POST', '/api/coinCalculator.htm', query),
-    userHashrateChart: (query) => apiRequest('POST', '/api/userHashrateChart.htm', query)
+    poolStats: () => apiRequest.post('/api/poolStats.htm'),
+    account: (params) => apiRequest.post('/api/account.htm', params),
+    hashrate: (params) => apiRequest.post('/api/hashrate.htm', params),
+    workers: (params) => apiRequest.post('/api/workers.htm', params),
+    paymentHistoryV2: (params) => apiRequest.post('/api/paymentHistoryV2.htm', params),
+    changeMiningCoin: () => apiRequest.post('/api/changeMiningCoin.htm'),
+    accountOverview: (params) => apiRequest.post('/api/accountOverview.htm', params),
+    userWorkerList: (params) => apiRequest.post('/api/userWorkerList.htm', params),
+    coinCalculator: (params) => apiRequest.post('/api/coinCalculator.htm', params),
+    userHashrateChart: (params) => apiRequest.post('/api/userHashrateChart.htm', params)
   }
 }
