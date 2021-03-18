@@ -1,0 +1,46 @@
+{
+  "name": "node-antpool",
+  "version": "1.0.0",
+  "description": "",
+  "main": "dist",
+  "files": [
+    "dist/",
+    "index.d.ts"
+  ],
+  "scripts": {
+    "prebuild": "rimraf dist",
+    "build": "babel src -d dist",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/4tj/node-antpool.git"
+  },
+  "keywords": [
+    "antpool"
+  ],
+  "author": "4tj <doublleft@gmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/4tj/node-antpool/issues"
+  },
+  "homepage": "https://github.com/4tj/node-antpool#readme",
+  "devDependencies": {
+    "@babel/cli": "^7.13.10",
+    "@babel/core": "^7.13.10",
+    "@babel/preset-env": "^7.13.10",
+    "@typescript-eslint/eslint-plugin": "^4.18.0",
+    "@typescript-eslint/parser": "^4.18.0",
+    "babel-plugin-module-resolver": "^4.1.0",
+    "eslint": "^7.22.0",
+    "eslint-config-standard": "^16.0.2",
+    "eslint-plugin-import": "^2.22.1",
+    "eslint-plugin-node": "^11.1.0",
+    "eslint-plugin-promise": "^4.3.1",
+    "regenerator-runtime": "^0.13.7"
+  },
+  "dependencies": {
+    "axios": "^0.21.1",
+    "rimraf": "^3.0.2"
+  }
+}
