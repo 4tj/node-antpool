@@ -1,6 +1,6 @@
 {
   "name": "node-antpool",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "",
   "main": "dist",
   "files": [
@@ -36,8 +36,7 @@
     "eslint-config-standard": "^16.0.2",
     "eslint-plugin-import": "^2.22.1",
     "eslint-plugin-node": "^11.1.0",
-    "eslint-plugin-promise": "^4.3.1",
-    "regenerator-runtime": "^0.13.7"
+    "eslint-plugin-promise": "^4.3.1"
   },
   "dependencies": {
     "axios": "^0.21.1",
