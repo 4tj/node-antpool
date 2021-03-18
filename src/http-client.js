@@ -2,6 +2,8 @@ import axios from 'axios'
 import { createHmac } from 'crypto'
 
 const ENDPOINT = 'https://antpool.com'
+const TIMEOUT = 5000
+
 const createNonce = () => Date.now()
 const createSignature = (input, secret) => {
   let msg = ''
@@ -11,7 +13,7 @@ const createSignature = (input, secret) => {
   return createHmac('sha256', secret).update(msg).digest('hex').toUpperCase()
 }
 
-const createApiCall = ({ key, secret, userId, coin, endpoint }) => async (
+const createApiCall = ({ key, secret, userId, coin, endpoint, timeout }) => async (
   method,
   path,
   query
@@ -34,7 +36,8 @@ const createApiCall = ({ key, secret, userId, coin, endpoint }) => async (
   const response = await axios.request({
     url: `${endpoint}${path}`,
     method,
-    params
+    params,
+    timeout
   })
 
   return response.data
@@ -42,7 +45,9 @@ const createApiCall = ({ key, secret, userId, coin, endpoint }) => async (
 
 export default options => {
   const endpoint = (options && options.endpoint) || ENDPOINT
-  const apiRequest = createApiCall({ ...options, endpoint })
+  const timeout = (options && options.timeout) || TIMEOUT
+
+  const apiRequest = createApiCall({ ...options, endpoint, timeout })
   return {
     poolStats: () => apiRequest('POST', '/api/poolStats.htm'),
     account: (query) => apiRequest('POST', '/api/account.htm', query),
