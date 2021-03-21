@@ -196,11 +196,11 @@ declare module 'node-antpool' {
     hashrate (options?: { userId?: string }): Promise<HashrateResponse>
     workers (options?: { clientUserId: string, groupId?: string, pageEnable?: boolean, page?: number, pageSize?: number }): Promise<WorkersResponse>
     paymentHistoryV2 (options?: { pageEnable?: boolean, type: PaymentType, page?: number, pageSize?: number }): Promise<PaymentHistoryV2Response>
-    changeMiningCoin (): Promise<ChangeMiningCoinResponse>
+    changeMiningCoin (coin: string): Promise<ChangeMiningCoinResponse>
     accountOverview (options?: { userId: string }): Promise<AccountOverviewResponse>
     userWorkerList (options?: { userId: string, workerStatus: WorkerStatus, page: number, pageSize: number }): Promise<UserWorkerListResponse>
-    coinCalculator (options?: { hashInput: number, networkDiff?: number, feePercent?: number }): Promise<CoinCalculatorResponse>
-    userHashrateChart (opitons?: { userId: string, userWorkerId: string, date: string, type: number }): Promise<UserHashrateChartResponse>
+    coinCalculator (options?: { hashInput: number, networkDiff?: number, coinType: string, feePercent?: number }): Promise<CoinCalculatorResponse>
+    userHashrateChart (opitons?: { userId: string, userWorkerId: string, coinType: string, date: string, type: number }): Promise<UserHashrateChartResponse>
   }
 
   export interface AntPoolClientOptions {

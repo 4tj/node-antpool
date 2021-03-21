@@ -1,5 +1,15 @@
 import axios from 'axios'
+import { URLSearchParams } from 'url'
 import { createHmac } from 'crypto'
+
+axios.interceptors.response.use((response) => {
+  if (response.data?.code !== 0) {
+    throw Error(response.data.message)
+  }
+  return response.data.data
+}, (error) => {
+  return Promise.reject(error)
+})
 
 const ENDPOINT = 'https://antpool.com'
 const TIMEOUT = 5000
@@ -13,7 +23,7 @@ const createSignature = (input, secret) => {
   return createHmac('sha256', secret).update(msg).digest('hex').toUpperCase()
 }
 
-const createApiCall = ({ key, secret, userId, coin, endpoint, timeout }) => {
+const createApiCall = ({ key, secret, userId, coin, endpoint, timeout }) => (uri, params) => {
   const nonce = createNonce()
   const input = [
     userId,
@@ -21,27 +31,22 @@ const createApiCall = ({ key, secret, userId, coin, endpoint, timeout }) => {
     nonce
   ]
 
-  const instance = axios.create({
-    baseURL: endpoint,
-    timeout,
-    params: {
-      key,
-      nonce,
-      signature: createSignature(input, secret),
-      coin
-    }
+  const qs = new URLSearchParams({
+    key,
+    nonce,
+    signature: createSignature(input, secret),
+    coin,
+    ...params
+  })
+  console.log(`${endpoint}${uri}?${qs.toString()}`)
+
+  const response = axios.request({
+    url: `${endpoint}${uri}?${qs.toString()}`,
+    method: 'POST'
   })
 
-  instance.interceptors.response.use((response) => {
-    if (response.data?.code !== 0) {
-      throw Error(response.data.message)
-    }
-    return response.data.data
-  }, (error) => {
-    return Promise.reject(error)
-  })
-
-  return instance
+  console.log(response)
+  return response
 }
 
 export default options => {
@@ -50,15 +55,15 @@ export default options => {
   const apiRequest = createApiCall({ ...options, endpoint, timeout })
 
   return {
-    poolStats: () => apiRequest.post('/api/poolStats.htm'),
-    account: (params) => apiRequest.post('/api/account.htm', params),
-    hashrate: (params) => apiRequest.post('/api/hashrate.htm', params),
-    workers: (params) => apiRequest.post('/api/workers.htm', params),
-    paymentHistoryV2: (params) => apiRequest.post('/api/paymentHistoryV2.htm', params),
-    changeMiningCoin: () => apiRequest.post('/api/changeMiningCoin.htm'),
-    accountOverview: (params) => apiRequest.post('/api/accountOverview.htm', params),
-    userWorkerList: (params) => apiRequest.post('/api/userWorkerList.htm', params),
-    coinCalculator: (params) => apiRequest.post('/api/coinCalculator.htm', params),
-    userHashrateChart: (params) => apiRequest.post('/api/userHashrateChart.htm', params)
+    poolStats: () => apiRequest('/api/poolStats.htm'),
+    account: (params) => apiRequest('/api/account.htm', params),
+    hashrate: (params) => apiRequest('/api/hashrate.htm', params),
+    workers: (params) => apiRequest('/api/workers.htm', params),
+    paymentHistoryV2: (params) => apiRequest('/api/paymentHistoryV2.htm', params),
+    changeMiningCoin: (coin) => apiRequest('/api/changeMiningCoin.htm', { coin }),
+    accountOverview: (params) => apiRequest('/api/accountOverview.htm', params),
+    userWorkerList: (params) => apiRequest('/api/userWorkerList.htm', params),
+    coinCalculator: (params) => apiRequest('/api/coinCalculator.htm', params),
+    userHashrateChart: (params) => apiRequest('/api/userHashrateChart.htm', params)
   }
 }
