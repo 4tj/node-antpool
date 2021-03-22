@@ -30,7 +30,9 @@ const createApiCall = ({ key, secret, userId, coin, endpoint, timeout }) => (uri
     ...params
   })
 
-  axios.interceptors.response.use((response) => {
+  const instace = axios.create()
+
+  instace.interceptors.response.use((response) => {
     if (response.data?.code !== 0) {
       throw Error(response.data.message)
     }
@@ -39,12 +41,11 @@ const createApiCall = ({ key, secret, userId, coin, endpoint, timeout }) => (uri
     return Promise.reject(error)
   })
 
-  const response = axios.request({
+  const response = instace.request({
     url: `${endpoint}${uri}?${qs.toString()}`,
     method: 'POST'
   })
 
-  console.log(response)
   return response
 }
 
