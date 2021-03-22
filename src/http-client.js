@@ -2,15 +2,6 @@ import axios from 'axios'
 import { URLSearchParams } from 'url'
 import { createHmac } from 'crypto'
 
-axios.interceptors.response.use((response) => {
-  if (response.data?.code !== 0) {
-    throw Error(response.data.message)
-  }
-  return response.data.data
-}, (error) => {
-  return Promise.reject(error)
-})
-
 const ENDPOINT = 'https://antpool.com'
 const TIMEOUT = 5000
 
@@ -38,7 +29,15 @@ const createApiCall = ({ key, secret, userId, coin, endpoint, timeout }) => (uri
     coin,
     ...params
   })
-  console.log(`${endpoint}${uri}?${qs.toString()}`)
+
+  axios.interceptors.response.use((response) => {
+    if (response.data?.code !== 0) {
+      throw Error(response.data.message)
+    }
+    return response.data.data
+  }, (error) => {
+    return Promise.reject(error)
+  })
 
   const response = axios.request({
     url: `${endpoint}${uri}?${qs.toString()}`,
